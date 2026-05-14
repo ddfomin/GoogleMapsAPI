@@ -4,46 +4,51 @@ from requests import Response
 
 
 class Logger:
-    # Константы класса (можно вынести наружу или оставить здесь)
     log_dir = "logs"
+    _log_file = None  # Будет хранить путь к ЕДИНСТВЕННОМУ файлу
 
-    @staticmethod
-    def write_log_to_file(data: str):
+    @classmethod
+    def _get_log_file(cls):
+        """Создаёт ОДИН файл для всей сессии тестов"""
+        if cls._log_file is None:
+            # Создаём папку
+            os.makedirs(cls.log_dir, exist_ok=True)
+
+            # Создаём ОДИН файл (один раз)
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            cls._log_file = os.path.join(cls.log_dir, f"log_{timestamp}.log")
+
+            # Пишем заголовок в новый файл
+            with open(cls._log_file, 'a', encoding='utf-8') as f:
+                f.write(f"{'=' * 60}\n")
+                f.write(f"Запуск тестов: {datetime.datetime.now()}\n")
+                f.write(f"{'=' * 60}\n")
+
+        return cls._log_file
+
+    @classmethod
+    def write_log_to_file(cls, data: str):
         """Запись данных в лог-файл"""
-        # Создаем уникальное имя файла при каждом вызове
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        file_name = os.path.join(Logger.log_dir, f"log_{timestamp}.log")
-
-        # Создаем папку, если её нет
-        os.makedirs(Logger.log_dir, exist_ok=True)
+        file_name = cls._get_log_file()  # Всегда возвращает один и тот же файл
 
         with open(file_name, 'a', encoding='utf-8') as logger_file:
             logger_file.write(data)
 
-    @staticmethod
-    def add_request(url: str, method: str):
-        """Логирование запроса"""
-        test_name = os.environ.get('PYTEST_CURRENT_TEST')
+    @classmethod
+    def add_request(cls, url: str, method: str):
+        test_name = os.environ.get('PYTEST_CURRENT_TEST', 'Unknown test')
 
-        data_to_add = f"\n-----\n"
+        data_to_add = f"\n{'-' * 60}\n"
         data_to_add += f"Test: {test_name}\n"
-        data_to_add += f"Time: {str(datetime.datetime.now())}\n"
-        data_to_add += f"Request method: {method}\n"
-        data_to_add += f"Request URL: {url}\n"
-        data_to_add += "\n"
+        data_to_add += f"Time: {datetime.datetime.now()}\n"
+        data_to_add += f"Request: {method} {url}\n"
 
-        Logger.write_log_to_file(data_to_add)
+        cls.write_log_to_file(data_to_add)
 
-    @staticmethod
-    def add_response(result: Response):
-        """Логирование ответа"""
-        cookies_as_dict = dict(result.cookies)
-        headers_as_dict = dict(result.headers)
-
+    @classmethod
+    def add_response(cls, result: Response):
         data_to_add = f"Response code: {result.status_code}\n"
-        data_to_add += f"Response text: {result.text}\n"
-        data_to_add += f"Response headers: {headers_as_dict}\n"
-        data_to_add += f"Response cookies: {cookies_as_dict}\n"
-        data_to_add += f"\n-----\n"
+        data_to_add += f"Response body: {result.text}\n"
+        data_to_add += f"{'=' * 60}\n"
 
-        Logger.write_log_to_file(data_to_add)
+        cls.write_log_to_file(data_to_add)
