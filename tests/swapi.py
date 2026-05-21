@@ -1,3 +1,6 @@
+# Дополнительный тест (не относится к проекту) для проверки API Звездных Войн (SWAPI - Star Wars API). Тест выполняет анализ связей между персонажами и их участием в фильмах.
+# Тест находит всех персонажей, которые снимались в тех же фильмах, что и Дарт Вейдер (персонаж ID: 4).
+
 import requests
 
 # Пропуск ошибки: InsecureRequestWarning: Unverified HTTPS request is being made to host 'swapi.dev'. Adding certificate verification is strongly advised
