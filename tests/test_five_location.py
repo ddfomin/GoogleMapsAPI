@@ -95,3 +95,33 @@ def test_complete_places_management():
 
         print(f"\nОжидалось 3 существующие локации, получено {len(existing)}")
         assert len(existing) == 3, f"Ожидалось 3 существующие локации, получено {len(existing)}"
+
+    with allure.step("Удаление файлов с локациями"):
+        print("\nУдаление временных файлов")
+        import os
+
+        files_to_remove = ["places.txt", "existing_places.txt"]
+
+        for file_name in files_to_remove:
+            if os.path.exists(file_name):
+                os.remove(file_name)
+                print(f"Файл {file_name} удален")
+                allure.attach(
+                    f"Файл {file_name} успешно удален",
+                    f"Удаление {file_name}",
+                    allure.attachment_type.TEXT
+                )
+            else:
+                print(f"Файл {file_name} не найден")
+                allure.attach(
+                    f"Файл {file_name} не существует",
+                    f"Пропуск {file_name}",
+                    allure.attachment_type.TEXT
+                )
+
+        allure.attach(
+            "Все временные файлы очищены",
+            "Очистка завершена",
+            allure.attachment_type.TEXT
+        )
+        print("\nТест успешно завершен: создано 5 локаций, удалено 2, осталось 3")
