@@ -19,7 +19,7 @@ allure-report/
 
 # Test files
 *.txt
-!requirements.txt
+!google_maps_api/requirements.txt
 
 # IDE
 .vscode/
